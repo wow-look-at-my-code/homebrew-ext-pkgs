@@ -1,0 +1,110 @@
+name: Update Formulas
+
+on:
+  schedule:
+    # Run daily at 6am UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-formulas:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update formulas
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          update_formula() {
+            local formula_file="$1"
+            local repo="$2"
+            local formula_name
+            formula_name=$(basename "$formula_file" .rb)
+
+            echo "Checking $formula_name..."
+
+            # Get latest release tag from GitHub API
+            local latest_tag
+            latest_tag=$(gh api "repos/${repo}/releases/latest" --jq '.tag_name' 2>/dev/null || echo "")
+
+            if [[ -z "$latest_tag" ]]; then
+              echo "  No releases found for $repo, skipping"
+              return 0
+            fi
+
+            # Extract current version from formula
+            local current_version
+            current_version=$(grep -oP 'url.*tags/v?\K[0-9]+\.[0-9]+\.[0-9]+' "$formula_file" || echo "")
+
+            # Normalize latest tag (remove 'v' prefix if present)
+            local latest_version="${latest_tag#v}"
+
+            echo "  Current: $current_version, Latest: $latest_version"
+
+            if [[ "$current_version" == "$latest_version" ]]; then
+              echo "  Already up to date"
+              return 0
+            fi
+
+            echo "  Updating to $latest_version..."
+
+            # Download tarball and compute SHA256
+            local tarball_url="https://github.com/${repo}/archive/refs/tags/${latest_tag}.tar.gz"
+            local new_sha256
+            new_sha256=$(curl -sL "$tarball_url" | sha256sum | cut -d' ' -f1)
+
+            if [[ -z "$new_sha256" || ${#new_sha256} -ne 64 ]]; then
+              echo "  Failed to compute SHA256, skipping"
+              return 1
+            fi
+
+            # Update the formula file
+            sed -i "s|archive/refs/tags/v\?[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz|archive/refs/tags/${latest_tag}.tar.gz|" "$formula_file"
+            sed -i "s/sha256 \"[a-f0-9]\{64\}\"/sha256 \"${new_sha256}\"/" "$formula_file"
+
+            echo "  Updated to $latest_version (sha256: ${new_sha256:0:16}...)"
+            return 0
+          }
+
+          # Define formulas and their upstream repos
+          declare -A FORMULAS=(
+            ["Formula/bats-support.rb"]="bats-core/bats-support"
+            ["Formula/bats-assert.rb"]="bats-core/bats-assert"
+          )
+
+          UPDATED=false
+
+          for formula in "${!FORMULAS[@]}"; do
+            if [[ -f "$formula" ]]; then
+              if update_formula "$formula" "${FORMULAS[$formula]}"; then
+                if git diff --quiet "$formula"; then
+                  : # No changes
+                else
+                  UPDATED=true
+                fi
+              fi
+            fi
+          done
+
+          echo "updated=$UPDATED" >> "$GITHUB_OUTPUT"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Update formulas to latest versions"
+          title: "Update formulas to latest upstream versions"
+          body: |
+            Automated formula update.
+
+            This PR was created by the update-formulas workflow.
+          branch: auto-update-formulas
+          delete-branch: true
