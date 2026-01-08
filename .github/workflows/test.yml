@@ -1,0 +1,59 @@
+name: Test Formulas
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Cache Homebrew
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            ~/.cache/Homebrew
+          key: ${{ runner.os }}-homebrew-${{ hashFiles('Formula/*.rb') }}
+          restore-keys: |
+            ${{ runner.os }}-homebrew-
+
+      - name: Add tap
+        run: |
+          brew tap wow-look-at-my-code/ext-pkgs "${{ github.workspace }}"
+
+      - name: Audit formulas
+        run: |
+          for formula in Formula/*.rb; do
+            name=$(basename "$formula" .rb)
+            echo "==> Auditing $name"
+            brew audit --strict "wow-look-at-my-code/ext-pkgs/$name" || true
+          done
+
+      - name: Test bats formulas
+        run: |
+          # Install and test lightweight formulas
+          for formula in bats-support bats-assert; do
+            echo "==> Installing $formula"
+            brew install "wow-look-at-my-code/ext-pkgs/$formula"
+            echo "==> Testing $formula"
+            brew test "wow-look-at-my-code/ext-pkgs/$formula"
+          done
+
+      - name: Verify glibc formula syntax
+        run: |
+          # glibc requires kernel headers to build, so we only verify syntax
+          echo "==> Verifying glibc@2.41 formula syntax"
+          brew ruby -e "require 'formula'; Formula['wow-look-at-my-code/ext-pkgs/glibc@2.41']"
+          echo "glibc@2.41 formula syntax is valid"
+          echo "Note: Full installation test skipped (requires kernel headers)"

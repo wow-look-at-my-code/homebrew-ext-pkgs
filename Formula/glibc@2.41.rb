@@ -1,7 +1,7 @@
 # typed: false
 # frozen_string_literal: true
 
-class Glibc < Formula
+class GlibcAT241 < Formula
   desc "GNU C Library"
   homepage "https://www.gnu.org/software/libc/"
   url "https://ftp.gnu.org/gnu/glibc/glibc-2.41.tar.xz"
