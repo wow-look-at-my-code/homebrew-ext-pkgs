@@ -10,6 +10,7 @@ class GlibcAT241 < Formula
 
   depends_on "bison" => :build
   depends_on "gawk" => :build
+  depends_on "linux-headers@5.15" => :build
   depends_on "make" => :build
   depends_on "python@3" => :build
   depends_on :linux
@@ -24,7 +25,7 @@ class GlibcAT241 < Formula
         --enable-kernel=4.4.0
         --disable-werror
         --enable-stack-protector=strong
-        --with-headers=/usr/include
+        --with-headers=#{Formula["linux-headers@5.15"].include}
         --disable-nscd
       ]
 

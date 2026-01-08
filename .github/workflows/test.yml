@@ -5,6 +5,13 @@ on: push
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        formula:
+          - bats-support
+          - bats-assert
+          - glibc@2.41
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,40 +26,27 @@ jobs:
           path: |
             ~/Library/Caches/Homebrew
             ~/.cache/Homebrew
-          key: ${{ runner.os }}-homebrew-${{ hashFiles('Formula/*.rb') }}
+          key: ${{ runner.os }}-homebrew-${{ matrix.formula }}-${{ hashFiles('Formula/*.rb') }}
           restore-keys: |
+            ${{ runner.os }}-homebrew-${{ matrix.formula }}-
             ${{ runner.os }}-homebrew-
-
-      - name: Install kernel headers for glibc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y linux-headers-generic linux-libc-dev
 
       - name: Add tap
         run: |
           mkdir -p "$(brew --repository)/Library/Taps/wow-look-at-my-code"
           ln -s "${{ github.workspace }}" "$(brew --repository)/Library/Taps/wow-look-at-my-code/homebrew-ext-pkgs"
 
-      - name: Audit formulas
+      - name: Audit formula
         run: |
-          for formula in Formula/*.rb; do
-            name=$(basename "$formula" .rb)
-            echo "==> Auditing $name"
-            brew audit --strict "wow-look-at-my-code/ext-pkgs/$name" || true
-          done
+          echo "==> Auditing ${{ matrix.formula }}"
+          brew audit --strict "wow-look-at-my-code/ext-pkgs/${{ matrix.formula }}" || true
 
-      - name: Test bats formulas
+      - name: Install formula
         run: |
-          for formula in bats-support bats-assert; do
-            echo "==> Installing $formula"
-            brew install "wow-look-at-my-code/ext-pkgs/$formula"
-            echo "==> Testing $formula"
-            brew test "wow-look-at-my-code/ext-pkgs/$formula"
-          done
+          echo "==> Installing ${{ matrix.formula }}"
+          brew install "wow-look-at-my-code/ext-pkgs/${{ matrix.formula }}"
 
-      - name: Test glibc formula
+      - name: Test formula
         run: |
-          echo "==> Installing glibc@2.41"
-          brew install "wow-look-at-my-code/ext-pkgs/glibc@2.41"
-          echo "==> Testing glibc@2.41"
-          brew test "wow-look-at-my-code/ext-pkgs/glibc@2.41"
+          echo "==> Testing ${{ matrix.formula }}"
+          brew test "wow-look-at-my-code/ext-pkgs/${{ matrix.formula }}"
