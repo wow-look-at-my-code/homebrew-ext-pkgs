@@ -8,6 +8,7 @@ class Glibc < Formula
   sha256 "a5a26b22f545d6b7d7b3dd828e11e428f24f4fac43c934fb071b6a7d0828e901"
   license "LGPL-2.1-or-later"
 
+  depends_on "bison" => :build
   depends_on "gawk" => :build
   depends_on "make" => :build
   depends_on "python@3" => :build
