@@ -23,6 +23,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-homebrew-
 
+      - name: Install kernel headers for glibc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y linux-headers-generic linux-libc-dev
+
       - name: Add tap
         run: |
           mkdir -p "$(brew --repository)/Library/Taps/wow-look-at-my-code"
@@ -45,8 +50,9 @@ jobs:
             brew test "wow-look-at-my-code/ext-pkgs/$formula"
           done
 
-      - name: Verify glibc formula syntax
+      - name: Test glibc formula
         run: |
-          echo "==> Verifying glibc@2.41 formula syntax"
-          brew info "wow-look-at-my-code/ext-pkgs/glibc@2.41"
-          echo "glibc@2.41 formula syntax is valid (build skipped - requires kernel headers)"
+          echo "==> Installing glibc@2.41"
+          brew install "wow-look-at-my-code/ext-pkgs/glibc@2.41"
+          echo "==> Testing glibc@2.41"
+          brew test "wow-look-at-my-code/ext-pkgs/glibc@2.41"
