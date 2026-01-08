@@ -16,6 +16,8 @@ class GlibcAT241 < Formula
   depends_on :linux
 
   def install
+    ENV.O2 # glibc requires optimization to compile
+
     mkdir "build" do
       args = %W[
         --disable-debug
