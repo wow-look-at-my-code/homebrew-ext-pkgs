@@ -16,7 +16,9 @@ class GlibcAT241 < Formula
   depends_on :linux
 
   def install
-    ENV.O2 # glibc requires optimization to compile
+    # glibc requires optimization to compile
+    ENV.append "CFLAGS", "-O2"
+    ENV.append "CXXFLAGS", "-O2"
 
     mkdir "build" do
       args = %W[
