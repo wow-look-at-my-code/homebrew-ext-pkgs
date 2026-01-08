@@ -25,7 +25,8 @@ jobs:
 
       - name: Add tap
         run: |
-          brew tap wow-look-at-my-code/ext-pkgs "${{ github.workspace }}"
+          mkdir -p "$(brew --repository)/Library/Taps/wow-look-at-my-code"
+          ln -s "${{ github.workspace }}" "$(brew --repository)/Library/Taps/wow-look-at-my-code/homebrew-ext-pkgs"
 
       - name: Audit formulas
         run: |
@@ -37,7 +38,6 @@ jobs:
 
       - name: Test bats formulas
         run: |
-          # Install and test lightweight formulas
           for formula in bats-support bats-assert; do
             echo "==> Installing $formula"
             brew install "wow-look-at-my-code/ext-pkgs/$formula"
@@ -47,8 +47,6 @@ jobs:
 
       - name: Verify glibc formula syntax
         run: |
-          # glibc requires kernel headers to build, so we only verify syntax
           echo "==> Verifying glibc@2.41 formula syntax"
-          brew ruby -e "require 'formula'; Formula['wow-look-at-my-code/ext-pkgs/glibc@2.41']"
-          echo "glibc@2.41 formula syntax is valid"
-          echo "Note: Full installation test skipped (requires kernel headers)"
+          brew info "wow-look-at-my-code/ext-pkgs/glibc@2.41"
+          echo "glibc@2.41 formula syntax is valid (build skipped - requires kernel headers)"
