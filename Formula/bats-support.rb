@@ -10,13 +10,23 @@ class BatsSupport < Formula
 
   def install
     (lib/"bats-support").install Dir["*"]
+
+    # Install shell setup script
+    (etc/"profile.d").mkpath
+    (etc/"profile.d/bats.sh").write <<~EOS
+      # Set BATS_LIB_PATH if not already set
+      export BATS_LIB_PATH="${BATS_LIB_PATH:-#{HOMEBREW_PREFIX}/lib}"
+    EOS
   end
 
   def caveats
     <<~EOS
       bats-support is installed in #{lib}/bats-support
 
-      To use, add to your BATS_LIB_PATH:
+      To set up your environment, add this to your shell profile:
+        source "#{etc}/profile.d/bats.sh"
+
+      Or manually set:
         export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib"
 
       Then load in your test files:

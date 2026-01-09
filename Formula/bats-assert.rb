@@ -19,7 +19,10 @@ class BatsAssert < Formula
     <<~EOS
       bats-assert is installed in #{lib}/bats-assert
 
-      To use, add to your BATS_LIB_PATH:
+      To set up your environment, add this to your shell profile:
+        source "#{etc}/profile.d/bats.sh"
+
+      Or manually set:
         export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib"
 
       Then load in your test files:
