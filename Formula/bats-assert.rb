@@ -12,17 +12,27 @@ class BatsAssert < Formula
   depends_on "bats-support"
 
   def install
-    prefix.install Dir["*"]
+    (lib/"bats/bats-assert").install Dir["*"]
   end
 
   def caveats
     <<~EOS
-      Add to your test files:
-        load "#{opt_prefix}/load.bash"
+      Sorry, Homebrew can't write to /usr/lib/bats, so manual setup is required.
+
+      Option 1: Add to your shell profile:
+        export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib/bats${BATS_LIB_PATH:+:$BATS_LIB_PATH}"
+
+      Option 2: Symlink to the default BATS_LIB_PATH (requires sudo):
+        sudo mkdir -p /usr/lib/bats
+        sudo ln -s #{HOMEBREW_PREFIX}/lib/bats/bats-assert /usr/lib/bats/bats-assert
+
+      Then in your test files:
+        bats_load_library bats-support
+        bats_load_library bats-assert
     EOS
   end
 
   test do
-    assert_predicate prefix/"load.bash", :exist?
+    assert_predicate lib/"bats/bats-assert/load.bash", :exist?
   end
 end
