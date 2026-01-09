@@ -14,8 +14,14 @@ class BatsSupport < Formula
 
   def caveats
     <<~EOS
-      To use bats-support, add to your BATS_LIB_PATH:
+      Sorry, Homebrew can't write to /usr/lib/bats, so manual setup is required.
+
+      Option 1: Add to your shell profile:
         export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib/bats${BATS_LIB_PATH:+:$BATS_LIB_PATH}"
+
+      Option 2: Symlink to the default BATS_LIB_PATH (requires sudo):
+        sudo mkdir -p /usr/lib/bats
+        sudo ln -s #{HOMEBREW_PREFIX}/lib/bats/bats-support /usr/lib/bats/bats-support
 
       Then in your test files:
         bats_load_library bats-support
