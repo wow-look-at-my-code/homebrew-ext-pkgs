@@ -17,15 +17,7 @@ class BatsAssert < Formula
 
   def caveats
     <<~EOS
-      bats-assert is installed in #{lib}/bats-assert
-
-      To set up your environment, add this to your shell profile:
-        source "#{etc}/profile.d/bats.sh"
-
-      Or manually set:
-        export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib"
-
-      Then load in your test files:
+      In your test files, just use:
         bats_load_library bats-support
         bats_load_library bats-assert
     EOS

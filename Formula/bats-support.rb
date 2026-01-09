@@ -8,28 +8,24 @@ class BatsSupport < Formula
   sha256 "7815237aafeb42ddcc1b8c698fc5808026d33317d8701d5ec2396e9634e2918f"
   license "CC0-1.0"
 
+  depends_on "bats-core"
+
   def install
     (lib/"bats-support").install Dir["*"]
 
-    # Install shell setup script
-    (etc/"profile.d").mkpath
-    (etc/"profile.d/bats.sh").write <<~EOS
-      # Set BATS_LIB_PATH if not already set
+    # Install wrapper script that sets BATS_LIB_PATH
+    (bin/"bats").write <<~EOS
+      #!/bin/bash
       export BATS_LIB_PATH="${BATS_LIB_PATH:-#{HOMEBREW_PREFIX}/lib}"
+      exec "#{Formula["bats-core"].opt_bin}/bats" "$@"
     EOS
   end
 
   def caveats
     <<~EOS
-      bats-support is installed in #{lib}/bats-support
+      A wrapper script has been installed that automatically sets BATS_LIB_PATH.
 
-      To set up your environment, add this to your shell profile:
-        source "#{etc}/profile.d/bats.sh"
-
-      Or manually set:
-        export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib"
-
-      Then load in your test files:
+      In your test files, just use:
         bats_load_library bats-support
     EOS
   end
