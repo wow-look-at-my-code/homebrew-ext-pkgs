@@ -12,13 +12,13 @@ class BatsAssert < Formula
   depends_on "bats-support"
 
   def install
-    (lib/"bats-assert").install Dir["*"]
+    (lib/"bats/bats-assert").install Dir["*"]
   end
 
   def caveats
     <<~EOS
-      To use bats-assert, set BATS_LIB_PATH:
-        export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib"
+      To use bats-assert, add to your BATS_LIB_PATH:
+        export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib/bats${BATS_LIB_PATH:+:$BATS_LIB_PATH}"
 
       Then in your test files:
         bats_load_library bats-support
@@ -27,6 +27,6 @@ class BatsAssert < Formula
   end
 
   test do
-    assert_predicate lib/"bats-assert/load.bash", :exist?
+    assert_predicate lib/"bats/bats-assert/load.bash", :exist?
   end
 end
