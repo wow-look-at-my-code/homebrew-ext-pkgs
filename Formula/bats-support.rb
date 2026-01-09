@@ -10,6 +10,8 @@ class BatsSupport < Formula
 
   depends_on "bats-core"
 
+  link_overwrite "bin/bats"
+
   def install
     (lib/"bats-support").install Dir["*"]
 
