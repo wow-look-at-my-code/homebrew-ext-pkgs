@@ -17,9 +17,14 @@ class GlibcAT241 < Formula
 
   def install
     # Clean up environment to prevent conflicts with glibc build
-    ENV.delete "LD_LIBRARY_PATH"
-    ENV.delete "LDFLAGS"
-    ENV.delete "LIBRARY_PATH"
+    # (following homebrew-core's glibc formula approach)
+    %w[LDFLAGS LD_LIBRARY_PATH LD_RUN_PATH LIBRARY_PATH
+       HOMEBREW_DYNAMIC_LINKER HOMEBREW_LIBRARY_PATHS HOMEBREW_RPATH_PATHS
+       CFLAGS CXXFLAGS CPPFLAGS].each { |x| ENV.delete x }
+
+    # Use system gcc directly to avoid Homebrew's compiler wrapper
+    ENV["CC"] = "/usr/bin/gcc"
+    ENV["CXX"] = "/usr/bin/g++"
 
     mkdir "build" do
       args = %W[
@@ -34,7 +39,7 @@ class GlibcAT241 < Formula
         --disable-nscd
       ]
 
-      system "../configure", *args, "CFLAGS=-O2"
+      system "../configure", *args, "CFLAGS=-O2", "CXXFLAGS=-O2"
       system "make"
       system "make", "install"
     end
