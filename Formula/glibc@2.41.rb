@@ -16,10 +16,6 @@ class GlibcAT241 < Formula
   depends_on :linux
 
   def install
-    # glibc requires optimization - pass CFLAGS directly to configure
-    # as environment variables may be modified by Homebrew's superenv
-    cflags = "-O2 -pipe"
-
     # Clean up environment to prevent conflicts with glibc build
     ENV.delete "LD_LIBRARY_PATH"
     ENV.delete "LDFLAGS"
@@ -38,7 +34,7 @@ class GlibcAT241 < Formula
         --disable-nscd
       ]
 
-      system "../configure", *args, "CFLAGS=#{cflags}"
+      system "../configure", *args, "CFLAGS=-O2"
       system "make"
       system "make", "install"
     end
