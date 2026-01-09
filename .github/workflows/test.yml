@@ -62,4 +62,4 @@ jobs:
           echo "==> Testing coreutils-timeout"
           brew test "wow-look-at-my-code/ext-pkgs/coreutils-timeout"
           echo "==> Verifying timeout command works"
-          timeout --version
+          "$(brew --prefix coreutils-timeout)/bin/timeout" --version
