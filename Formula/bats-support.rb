@@ -9,10 +9,22 @@ class BatsSupport < Formula
   license "CC0-1.0"
 
   def install
-    prefix.install Dir["*"]
+    (lib/"bats-support").install Dir["*"]
+  end
+
+  def caveats
+    <<~EOS
+      bats-support is installed in #{lib}/bats-support
+
+      To use, add to your BATS_LIB_PATH:
+        export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib"
+
+      Then load in your test files:
+        bats_load_library bats-support
+    EOS
   end
 
   test do
-    assert_predicate prefix/"load.bash", :exist?
+    assert_predicate lib/"bats-support/load.bash", :exist?
   end
 end
