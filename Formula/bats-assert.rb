@@ -17,7 +17,10 @@ class BatsAssert < Formula
 
   def caveats
     <<~EOS
-      In your test files, just use:
+      To use bats-assert, set BATS_LIB_PATH:
+        export BATS_LIB_PATH="#{HOMEBREW_PREFIX}/lib"
+
+      Then in your test files:
         bats_load_library bats-support
         bats_load_library bats-assert
     EOS
