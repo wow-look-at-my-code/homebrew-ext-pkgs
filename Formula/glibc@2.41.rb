@@ -46,14 +46,11 @@ class GlibcAT241 < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~C
-      #include <stdio.h>
-      int main() {
-        printf("Hello, glibc!\\n");
-        return 0;
-      }
-    C
-    system ENV.cc, "test.c", "-o", "test"
-    assert_equal "Hello, glibc!\n", shell_output("./test")
+    # Test that the dynamic linker works
+    assert_match "Usage", shell_output("#{bin}/ld.so --help")
+    # Test that libc.so.6 can report its version
+    safe_system lib/"libc.so.6", "--version"
+    # Test that locale utility works
+    safe_system bin/"locale", "--version"
   end
 end
