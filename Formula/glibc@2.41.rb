@@ -11,6 +11,7 @@ class GlibcAT241 < Formula
   depends_on "bison" => :build
   depends_on "gawk" => :build
   depends_on "linux-headers@5.15" => :build
+  depends_on "m4" => :build
   depends_on "make" => :build
   depends_on "python@3" => :build
   depends_on :linux
